@@ -115,7 +115,9 @@ def sarif(reports: list[dict[str, Any]], comparison: dict[str, Any]) -> dict[str
                     {
                         "physicalLocation": {
                             "artifactLocation": {
-                                "uri": quote(report["source"].replace("\\", "/"), safe="/.-_")
+                                "uri": report["source"]
+                                if report["source"].startswith("file:")
+                                else quote(report["source"].replace("\\", "/"), safe="/.-_")
                             },
                             "region": item["region"],
                         }

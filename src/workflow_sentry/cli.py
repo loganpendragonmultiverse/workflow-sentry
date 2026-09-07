@@ -13,6 +13,13 @@ from .core import SEVERITY_ORDER, audit_file, discover
 from .review import review, sarif
 
 
+def _source_location(path: Path) -> str:
+    try:
+        return Path(os.path.relpath(path)).as_posix()
+    except ValueError:
+        return path.resolve().as_uri()
+
+
 def _markdown(reports: list[dict[str, object]]) -> str:
     lines = ["# Workflow Sentry report", ""]
     for report in reports:
@@ -53,9 +60,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.output and args.output.exists():
             raise ValueError("output already exists")
-        reports = [
-            audit_file(path, source=Path(os.path.relpath(path)).as_posix()) for path in files
-        ]
+        reports = [audit_file(path, source=_source_location(path)) for path in files]
         baseline = json.loads(args.baseline.read_text(encoding="utf-8")) if args.baseline else {}
         exceptions = (
             json.loads(args.exceptions.read_text(encoding="utf-8")) if args.exceptions else []

@@ -9,6 +9,24 @@ from workflow_sentry.core import audit_file
 from workflow_sentry.review import review, sarif
 
 
+def test_cross_drive_source_uri(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    import workflow_sentry.cli as cli
+
+    source = tmp_path / "space name.yml"
+    source.write_text("permissions: write-all", encoding="utf-8")
+
+    def different_drive(path: Path) -> str:
+        raise ValueError("different drives")
+
+    monkeypatch.setattr(cli.os.path, "relpath", different_drive)
+    assert cli._source_location(source) == source.as_uri()
+    report = audit_file(source, source=cli._source_location(source))
+    uri = sarif([report], {})["runs"][0]["results"][0]["locations"][0]["physicalLocation"][
+        "artifactLocation"
+    ]["uri"]
+    assert uri == source.as_uri()
+
+
 def test_regions_fingerprints_baseline_expiry_and_sarif(tmp_path: Path) -> None:
     source = tmp_path / "ci.yml"
     text = "on: push\npermissions: {}\njobs:\n  build:\n    steps:\n      - uses: owner/action@v1\n"
