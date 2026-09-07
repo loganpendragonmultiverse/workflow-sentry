@@ -10,7 +10,7 @@ from workflow_sentry.review import review, sarif
 
 
 def test_cross_drive_source_uri(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    import workflow_sentry.cli as cli
+    from workflow_sentry import cli
 
     source = tmp_path / "space name.yml"
     source.write_text("permissions: write-all", encoding="utf-8")
