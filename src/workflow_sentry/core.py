@@ -8,6 +8,8 @@ from typing import Any, cast
 
 import yaml
 
+from .review import enrich
+
 SEVERITY_ORDER = {"info": 0, "low": 1, "medium": 2, "high": 3, "critical": 4}
 UNTRUSTED_EXPRESSIONS = (
     "github.event.pull_request.title",
@@ -67,6 +69,20 @@ def _is_immutable_reference(reference: str) -> bool:
 
 
 def audit_document(document: dict[str, Any]) -> list[Finding]:
+    if _mapping(document.get("runs")).get("using") == "composite":
+        proxy = {
+            "permissions": {},
+            "jobs": {"composite": {"steps": _mapping(document["runs"]).get("steps", [])}},
+        }
+        return [
+            Finding(
+                f.severity,
+                f.code,
+                f.location.replace("jobs.composite.steps", "runs.steps"),
+                f.message,
+            )
+            for f in audit_document(proxy)
+        ]
     findings = _check_permissions(document.get("permissions"), "permissions")
     triggers = document.get("on", cast(dict[object, Any], document).get(True))
     trigger_names = {triggers} if isinstance(triggers, str) else set(_mapping(triggers))
@@ -83,6 +99,15 @@ def audit_document(document: dict[str, Any]) -> list[Finding]:
     for job_name, raw_job in _mapping(document.get("jobs")).items():
         job = _mapping(raw_job)
         location = f"jobs.{job_name}"
+        if isinstance(job.get("uses"), str) and not _is_immutable_reference(job["uses"]):
+            findings.append(
+                Finding(
+                    "medium",
+                    "WS007",
+                    f"{location}.uses",
+                    "Reusable workflow is not pinned to a full commit SHA.",
+                )
+            )
         if "permissions" in job:
             findings.extend(_check_permissions(job.get("permissions"), f"{location}.permissions"))
         runs_on = job.get("runs-on")
@@ -138,7 +163,7 @@ def audit_document(document: dict[str, Any]) -> list[Finding]:
     return findings
 
 
-def audit_file(path: Path) -> dict[str, object]:
+def audit_file(path: Path, *, source: str | None = None) -> dict[str, Any]:
     raw = path.read_bytes()
     loaded = yaml.safe_load(raw.decode("utf-8"))
     if not isinstance(loaded, dict):
@@ -149,10 +174,12 @@ def audit_file(path: Path) -> dict[str, object]:
     }
     return {
         "schemaVersion": 1,
-        "source": path.name,
+        "source": source or path.name,
         "sourceSha256": hashlib.sha256(raw).hexdigest(),
         "counts": counts,
-        "findings": [asdict(item) for item in findings],
+        "findings": enrich(
+            [asdict(item) for item in findings], raw.decode("utf-8"), source or path.name
+        ),
     }
 
 

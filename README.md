@@ -21,7 +21,7 @@ Exit status is `1` when a finding meets `--fail-on`. The default threshold is `c
 - Expression checks are deliberately narrow and evidence-based, so novel injection patterns may require manual review.
 - No network request, GitHub token, repository mutation, telemetry, or workflow execution occurs.
 
-Supported on Python 3.10+ for Windows, macOS, and Linux. Current release: **v1.0.0**.
+Supported on Python 3.10+ for Windows, macOS, and Linux. Current release: **v1.1.0**.
 
 ## Development
 
@@ -34,3 +34,13 @@ python -m build
 ```
 
 Security reports belong in `SECURITY.md` through the organization policy. Contributions are reviewed through pull requests. Licensed under MIT.
+
+## Version 1.1.0: reviewed improvements
+
+Add SARIF source annotations and stable fingerprints, dated review exceptions, baseline comparisons and reusable/composite workflow coverage.
+
+```bash
+workflow-sentry .github/workflows --format sarif --output workflow-review.sarif
+```
+
+--format sarif emits SARIF 2.1.0 locations with one-based YAML node line/column regions and logical locations. Missing properties point to their parent node and are labeled regionExact=false. Fingerprints combine relative source path, rule and logical location, remaining stable when unrelated lines move; changing indexed steps can change fingerprints. --baseline accepts a prior JSON report. --exceptions accepts a JSON array of fingerprint, explanation and expires (ISO date); --as-of controls expiry comparison, defaulting to the current UTC date. Expired exceptions never suppress failure thresholds. Reports retain suppressed findings and distinguish new, unchanged and resolved fingerprints. Composite steps and unpinned reusable workflow calls are covered by fixtures. No workflow is run, changed, or automatically trusted.
