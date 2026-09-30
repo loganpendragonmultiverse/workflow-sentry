@@ -8,6 +8,7 @@ from typing import Any, cast
 
 import yaml
 
+from .advanced import audit_advanced, trigger_names
 from .review import enrich
 
 SEVERITY_ORDER = {"info": 0, "low": 1, "medium": 2, "high": 3, "critical": 4}
@@ -85,8 +86,8 @@ def audit_document(document: dict[str, Any]) -> list[Finding]:
         ]
     findings = _check_permissions(document.get("permissions"), "permissions")
     triggers = document.get("on", cast(dict[object, Any], document).get(True))
-    trigger_names = {triggers} if isinstance(triggers, str) else set(_mapping(triggers))
-    if "pull_request_target" in trigger_names:
+    names = trigger_names(triggers)
+    if "pull_request_target" in names:
         findings.append(
             Finding(
                 "high",
@@ -160,6 +161,7 @@ def audit_document(document: dict[str, Any]) -> list[Finding]:
                         "Shell script interpolates untrusted event text directly.",
                     )
                 )
+    findings.extend(Finding(*row) for row in audit_advanced(document))
     return findings
 
 
