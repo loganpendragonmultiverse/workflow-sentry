@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.0 - 2026-09-30
+
+- Add WS010–WS014 for privileged checkout/event/artifact chains, mutable container actions, and remote scripts piped into interpreters.
+- Recognize list-style workflow triggers as well as string and mapping forms.
+- Add standalone HTML reports with review state and suggested remediation, plus `--list-rules`.
+- Add `--root`, repeatable `--exclude`, and baseline-backed `--new-only` failure control.
+- Retain existing default failure thresholds, value-free findings, review exceptions, JSON/Markdown/SARIF formats, and read-only analysis.
+
 ## 1.1.0 - 2026-09-07
 
 - Add SARIF source annotations and stable fingerprints, dated review exceptions, baseline comparisons and reusable/composite workflow coverage.
