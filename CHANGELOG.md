@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.2 - 2026-10-17
+
+- Check explicit self-hosted labels in mapping-form runner selections as well as direct labels.
+- Require GitHub expression delimiters before reporting untrusted event-text interpolation in shell scripts.
+
 ## 1.3.1 - 2026-10-17
 
 - Correct the stale release version in the README scope section and align the current-release documentation with this patch.
