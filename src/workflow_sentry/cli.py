@@ -30,18 +30,18 @@ def _markdown(reports: list[dict[str, object]]) -> str:
             [
                 f"## {report['source']}",
                 "",
-                "| Severity | Code | Location | Finding |",
-                "|---|---|---|---|",
+                "| Severity | Code | Location | Finding | Review state |",
+                "|---|---|---|---|---|",
             ]
         )
         findings = report["findings"]
         assert isinstance(findings, list)
         if not findings:
-            lines.append("| info | WS000 | workflow | No findings |")
+            lines.append("| info | WS000 | workflow | No findings | none |")
         for finding in findings:
             assert isinstance(finding, dict)
             lines.append(
-                f"| {finding['severity']} | {finding['code']} | `{finding['location']}` | {finding['message']} |"
+                f"| {finding['severity']} | {finding['code']} | `{finding['location']}` | {finding['message']} | {finding.get('exceptionState', 'none')} |"
             )
         lines.append("")
     return "\n".join(lines)
@@ -124,10 +124,15 @@ def main(argv: list[str] | None = None) -> int:
     except (OSError, ValueError, TypeError, yaml.YAMLError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
-    if args.output:
-        args.output.write_text(rendered + "\n", encoding="utf-8")
-    else:
-        print(rendered)
+    try:
+        if args.output:
+            with args.output.open("x", encoding="utf-8") as output:
+                output.write(rendered + "\n")
+        else:
+            print(rendered)
+    except OSError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
     threshold = SEVERITY_ORDER[args.fail_on]
     for report in reports:
         findings = report["findings"]
@@ -135,7 +140,7 @@ def main(argv: list[str] | None = None) -> int:
         if any(
             isinstance(item, dict)
             and not item.get("suppressed")
-            and (not args.new_only or item.get("baselineState") == "new")
+            and (not args.new_only or item.get("baselineState") != "unchanged")
             and SEVERITY_ORDER[str(item["severity"])] >= threshold
             for item in findings
         ):

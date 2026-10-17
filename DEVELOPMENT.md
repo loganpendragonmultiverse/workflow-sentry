@@ -13,3 +13,9 @@ Local formatting, lint, strict types and regression tests pass. Public release c
 ## Version 1.2.0: broader workflow review and portable baselines
 
 Add five rules for privileged event chains, attacker-controlled checkout refs, unpinned container action digests, downloaded scripts piped into interpreters, and workflow-run artifact review. Add escaped standalone HTML reports with remediation guidance, a rule inventory, source-root-relative baselines, repeated exclusions, and opt-in failure thresholds for newly introduced findings.
+
+## 1.3.0 acceptance
+
+Bind reviewed exceptions to the configuration they approved and reopen changed findings under new-only review.
+
+Copy both fingerprint and configuration_sha256 from a current JSON finding into each reviewed exception, together with explanation and expires. Any configuration-node change in that source file invalidates its bindings; comments, formatting and mapping-key order do not. The binding deliberately covers the full workflow configuration because permissions, events and neighboring steps affect trust. Legacy exceptions without a binding remain visible as unbound and do not suppress findings. Baselines now distinguish updated from unchanged, and --new-only evaluates new or updated findings. Hashes provide change evidence, not a signature or proof of safe workflow code. No actions are fetched or executed.

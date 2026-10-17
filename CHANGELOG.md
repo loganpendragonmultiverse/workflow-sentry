@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3.0 - 2026-10-17
+
+- Emit value-free configuration digests and require a matching binding before suppressing a finding
+- Mark legacy unbound, expired and changed-configuration exceptions without applying them
+- Keep baseline identity stable while reporting updated configuration and rechecking it under new-only
+- Return actionable report-write errors without overwriting files
+
 ## 1.2.0 - 2026-09-30
 
 - Add WS010–WS014 for privileged checkout/event/artifact chains, mutable container actions, and remote scripts piped into interpreters.
