@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.1 - 2026-10-17
+
+- Correct the stale release version in the README scope section and align the current-release documentation with this patch.
+- Preserve the 1.3.0 analysis behavior and public contracts.
+
 ## 1.3.0 - 2026-10-17
 
 - Emit value-free configuration digests and require a matching binding before suppressing a finding
