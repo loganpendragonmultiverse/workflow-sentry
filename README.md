@@ -13,7 +13,12 @@
 - Tie an exception to the configuration you reviewed so changed settings are checked again.
 
 
-## Current release 1.3.2
+## Current release 1.4.0
+
+Track scanned, excluded and unscanned baseline sources. Findings omitted from the current scan are unverified rather than resolved.
+Quoted strings inside GitHub expressions no longer trigger WS009, while equivalent dot and literal-index event references are checked. This remains a static check: dynamically computed index keys still require manual review.
+
+## Updates in 1.3.2
 
 Recognize explicit self-hosted labels in both direct and group/labels runner selections. WS009 checks event-text references inside GitHub expression delimiters (`${{ ... }}`); plain literal mentions no longer trigger a critical interpolation finding. Runner groups without an explicit self-hosted label are not assumed to be self-hosted.
 
@@ -50,7 +55,7 @@ Exit status is `1` when a finding meets `--fail-on`. The default threshold is `c
 - Expression checks are deliberately narrow and evidence-based, so novel injection patterns may require manual review.
 - No network request, GitHub token, repository mutation, telemetry, or workflow execution occurs.
 
-Supported on Python 3.10+ for Windows, macOS, and Linux. Version: **v1.3.2**.
+Supported on Python 3.10+ for Windows, macOS, and Linux. Version: **v1.4.0**.
 
 ## Development
 
@@ -87,3 +92,7 @@ workflow-sentry .github/workflows --root . --exclude '.github/workflows/fixtures
 ```
 
 Use the same `--root` for both baseline creation and comparison. `--new-only` requires a baseline and changes failure evaluation only; all findings remain in the report. Excluding every source is an input error. WS011/WS014 flag trust-boundary reviews and do not prove exploitation. WS012 accepts full SHA-256 container digests; WS013 recognizes a narrow remote-download pipe pattern. Static analysis still requires human review.
+
+## 1.4.0 report controls
+
+Baseline comparisons now distinguish resolved findings from unverified findings in sources not scanned. Reports record scanned sources, excluded discovered sources and baseline sources omitted from this run. A missing or excluded file is not proof of resolution; use the same source root for comparable runs. Failure thresholds still apply only to findings actually scanned.

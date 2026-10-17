@@ -20,10 +20,15 @@ Bind reviewed exceptions to the configuration they approved and reopen changed f
 
 Copy both fingerprint and configuration_sha256 from a current JSON finding into each reviewed exception, together with explanation and expires. Any configuration-node change in that source file invalidates its bindings; comments, formatting and mapping-key order do not. The binding deliberately covers the full workflow configuration because permissions, events and neighboring steps affect trust. Legacy exceptions without a binding remain visible as unbound and do not suppress findings. Baselines now distinguish updated from unchanged, and --new-only evaluates new or updated findings. Hashes provide change evidence, not a signature or proof of safe workflow code. No actions are fetched or executed.
 
-## Gold Star review — October 17, 2026
+## Prior Gold Star review — October 17, 2026
 
+Previously reviewed release: v1.3.2.
 Check local workflow files for risky settings and keep a record of findings you have reviewed.
 
 Logan considers this project complete. Continue fixes and maintenance, and consider good new ideas. The catalog records the reviewed release.
 
 Definition: https://www.loganpendragonforge.com/open-source/?gold=1
+
+## 1.4.0 report controls
+
+Baseline comparisons now distinguish resolved findings from unverified findings in sources not scanned. Reports record scanned sources, excluded discovered sources and baseline sources omitted from this run. A missing or excluded file is not proof of resolution; use the same source root for comparable runs. Failure thresholds still apply only to findings actually scanned.

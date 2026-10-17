@@ -69,6 +69,85 @@ def _is_immutable_reference(reference: str) -> bool:
     return bool(re.fullmatch(r"[0-9a-fA-F]{40}", reference.rsplit("@", 1)[1]))
 
 
+def _expression_tokens(script: str) -> list[list[str]]:
+    """Scan expression delimiters and escaped string literals in one forward pass."""
+    expressions: list[list[str]] = []
+    cursor = 0
+    while cursor < len(script):
+        opening = script.find("${{", cursor)
+        if opening < 0:
+            break
+        cursor = opening + 3
+        tokens: list[str] = []
+        while cursor < len(script):
+            if script.startswith("}}", cursor):
+                expressions.append(tokens)
+                cursor += 2
+                break
+            char = script[cursor]
+            if char == "'":
+                start = cursor
+                cursor += 1
+                while cursor < len(script):
+                    if script[cursor] == "'":
+                        cursor += 1
+                        if cursor < len(script) and script[cursor] == "'":
+                            cursor += 1
+                            continue
+                        tokens.append(script[start:cursor])
+                        break
+                    cursor += 1
+                else:
+                    return expressions
+            elif char.isascii() and (char.isalpha() or char == "_"):
+                start = cursor
+                cursor += 1
+                while (
+                    cursor < len(script)
+                    and script[cursor].isascii()
+                    and (script[cursor].isalnum() or script[cursor] in "_-")
+                ):
+                    cursor += 1
+                tokens.append(script[start:cursor])
+            else:
+                if not char.isspace():
+                    tokens.append(char)
+                cursor += 1
+    return expressions
+
+
+def _interpolates_untrusted_event_text(script: str) -> bool:
+    """Recognize literal property/index paths without treating strings as references."""
+    unsafe = {tuple(path.split(".")) for path in UNTRUSTED_EXPRESSIONS}
+    for tokens in _expression_tokens(script):
+        for index, token in enumerate(tokens):
+            if token.casefold() != "github" or (index > 0 and tokens[index - 1] == "."):
+                continue
+            parts = ["github"]
+            cursor = index + 1
+            while cursor < len(tokens):
+                if (
+                    tokens[cursor] == "."
+                    and cursor + 1 < len(tokens)
+                    and re.fullmatch(r"[A-Za-z_][A-Za-z0-9_-]*", tokens[cursor + 1])
+                ):
+                    parts.append(tokens[cursor + 1].casefold())
+                    cursor += 2
+                elif (
+                    tokens[cursor] == "["
+                    and cursor + 2 < len(tokens)
+                    and tokens[cursor + 1].startswith("'")
+                    and tokens[cursor + 2] == "]"
+                ):
+                    parts.append(tokens[cursor + 1][1:-1].replace("''", "'").casefold())
+                    cursor += 3
+                else:
+                    break
+            if any(tuple(parts[: len(path)]) == path for path in unsafe):
+                return True
+    return False
+
+
 def audit_document(document: dict[str, Any]) -> list[Finding]:
     if _mapping(document.get("runs")).get("using") == "composite":
         proxy = {
@@ -153,11 +232,7 @@ def audit_document(document: dict[str, Any]) -> list[Finding]:
                         )
                     )
             run = step.get("run")
-            if isinstance(run, str) and any(
-                expr in match.group(1)
-                for match in re.finditer(r"\$\{\{(.*?)\}\}", run, re.DOTALL)
-                for expr in UNTRUSTED_EXPRESSIONS
-            ):
+            if isinstance(run, str) and _interpolates_untrusted_event_text(run):
                 findings.append(
                     Finding(
                         "critical",

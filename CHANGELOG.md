@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.4.0 - 2026-10-17
+
+- Track scanned, excluded and unscanned baseline sources. Findings omitted from the current scan are unverified rather than resolved.
+- Quoted strings inside GitHub expressions no longer trigger WS009, while equivalent dot and literal-index event references are checked. This remains a static check: dynamically computed index keys still require manual review.
+
 ## 1.3.2 - 2026-10-17
 
 - Check explicit self-hosted labels in mapping-form runner selections as well as direct labels.

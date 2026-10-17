@@ -108,15 +108,26 @@ def review(
         }
     old: set[str] = set()
     old_digests: dict[str, str | None] = {}
+    old_sources: dict[str, str | None] = {}
+    scanned_sources = {
+        report["source"] for report in reports if isinstance(report.get("source"), str)
+    }
+    baseline_sources: set[str] = set()
     for report in baseline.get("reports", []):
         if not isinstance(report, dict) or not isinstance(report.get("findings"), list):
             raise TypeError("baseline reports require findings arrays")
+        source = report.get("source")
+        if source is not None and not isinstance(source, str):
+            raise TypeError("baseline source must be a string")
+        if source is not None:
+            baseline_sources.add(source)
         for item in report["findings"]:
             if not isinstance(item, dict) or not isinstance(item.get("fingerprint"), str):
                 raise TypeError(
                     "baseline findings require fingerprints from a current-format report"
                 )
             old.add(item["fingerprint"])
+            old_sources[item["fingerprint"]] = source
             old_digests[item["fingerprint"]] = item.get("configuration_sha256")
     current: set[str] = set()
     updated: set[str] = set()
@@ -152,7 +163,21 @@ def review(
     return {
         "asOf": as_of,
         "new": sorted(current - old),
-        "resolved": sorted(old - current),
+        "resolved": sorted(
+            fingerprint
+            for fingerprint in old - current
+            if old_sources[fingerprint] in scanned_sources
+        ),
+        "unverified": sorted(
+            fingerprint
+            for fingerprint in old - current
+            if old_sources[fingerprint] not in scanned_sources
+        ),
+        "coverage": {
+            "scannedSources": sorted(scanned_sources),
+            "unscannedBaselineSources": sorted(baseline_sources - scanned_sources),
+            "excludedSources": [],
+        },
         "unchanged": sorted((old & current) - updated),
         "updated": sorted(updated),
         "exceptions": list(allowed.values()),
