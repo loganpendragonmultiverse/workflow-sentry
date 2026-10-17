@@ -91,6 +91,7 @@ def main(argv: list[str] | None = None) -> int:
     except ValueError:
         print("error: a source is outside --root", file=sys.stderr)
         return 2
+    discovered_sources = set(sources.values())
     files = [
         path
         for path in files
@@ -107,6 +108,9 @@ def main(argv: list[str] | None = None) -> int:
             json.loads(args.exceptions.read_text(encoding="utf-8")) if args.exceptions else []
         )
         comparison = review(reports, baseline, exceptions, args.as_of)
+        comparison["coverage"]["excludedSources"] = sorted(
+            discovered_sources - {sources[path] for path in files}
+        )
         rendered = (
             html_report(reports, comparison)
             if args.format == "html"

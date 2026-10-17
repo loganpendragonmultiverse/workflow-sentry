@@ -54,7 +54,7 @@ def test_regions_fingerprints_baseline_expiry_and_sarif(tmp_path: Path) -> None:
     assert result["locations"][0]["physicalLocation"]["region"]["startLine"] == 7
     review([current], {}, exceptions, "2026-09-09")
     assert not current["findings"][0]["suppressed"]
-    assert review([], {"reports": [first]}, [], "2026-09-07")["resolved"] == [item["fingerprint"]]
+    assert review([], {"reports": [first]}, [], "2026-09-07")["unverified"] == [item["fingerprint"]]
 
 
 @pytest.mark.parametrize(

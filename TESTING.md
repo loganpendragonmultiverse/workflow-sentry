@@ -19,3 +19,13 @@ Verify Emit value-free configuration digests and require a matching binding befo
 ## 1.3.2 runner and interpolation regression acceptance
 
 Verify mapping-form runner labels produce WS005, plain event-path text does not produce WS009, and actual inline GitHub expressions still do. Exercise CLI JSON, SARIF and exit thresholds using disposable workflow files. Run the existing quality gates and installed tag-built wheel regressions.
+
+## 1.4.0 regression acceptance
+
+Quoted strings inside GitHub expressions no longer trigger WS009, while equivalent dot and literal-index event references are checked. This remains a static check: dynamically computed index keys still require manual review.
+
+Run the new source and CLI regression cases with the complete existing quality gates. Recheck installed tag-built artifacts after review and release approval.
+
+## 1.4.0 report controls
+
+Baseline comparisons now distinguish resolved findings from unverified findings in sources not scanned. Reports record scanned sources, excluded discovered sources and baseline sources omitted from this run. A missing or excluded file is not proof of resolution; use the same source root for comparable runs. Failure thresholds still apply only to findings actually scanned.

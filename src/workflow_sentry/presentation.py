@@ -25,10 +25,15 @@ def html_report(reports: list[dict[str, Any]], comparison: dict[str, Any]) -> st
             rows.append(
                 "<tr>" + "".join("<td>" + escape(str(x)) + "</td>" for x in cells) + "</tr>"
             )
-    counts = {k: len(comparison.get(k, [])) for k in ("new", "unchanged", "resolved")}
+    counts = {
+        k: len(comparison.get(k, []))
+        for k in ("new", "unchanged", "updated", "resolved", "unverified")
+    }
     return (
         '<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Workflow Sentry review</title><style>body{font:16px system-ui;margin:2rem;color:#182028;background:#fff}table{border-collapse:collapse;width:100%}td,th{border:1px solid #bbb;padding:.65rem;text-align:left;overflow-wrap:anywhere}.table{overflow:auto}th{background:#eef2f5}</style><h1>Workflow Sentry review</h1><p>Static findings require review. No workflow was executed or changed.</p><p>'
         + escape(str(counts))
+        + "</p><p>Unverified findings belong to sources not scanned in this run; they are not confirmed resolved. Coverage: "
+        + escape(str(comparison.get("coverage", {})))
         + '</p><div class="table"><table><thead><tr>'
         + "".join(
             "<th>" + x + "</th>"
