@@ -1,5 +1,11 @@
 # Workflow Sentry
 
+## Current release 1.3.0
+
+Bind reviewed exceptions to the configuration they approved and reopen changed findings under new-only review.
+
+Copy both fingerprint and configuration_sha256 from a current JSON finding into each reviewed exception, together with explanation and expires. Any configuration-node change in that source file invalidates its bindings; comments, formatting and mapping-key order do not. The binding deliberately covers the full workflow configuration because permissions, events and neighboring steps affect trust. Legacy exceptions without a binding remain visible as unbound and do not suppress findings. Baselines now distinguish updated from unchanged, and --new-only evaluates new or updated findings. Hashes provide change evidence, not a signature or proof of safe workflow code. No actions are fetched or executed.
+
 Workflow Sentry audits GitHub Actions YAML locally for high-impact security risks before a workflow is merged.
 
 It checks explicit token permissions, immutable action references, `pull_request_target`, self-hosted runners, inherited reusable-workflow secrets, checkout credential persistence, and direct shell interpolation of untrusted event text. Required `security-events: write` access is surfaced as informational evidence rather than treated as a defect. Reports contain rule locations and classifications, not repository secrets or workflow values.

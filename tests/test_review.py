@@ -41,6 +41,7 @@ def test_regions_fingerprints_baseline_expiry_and_sarif(tmp_path: Path) -> None:
     exceptions = [
         {
             "fingerprint": item["fingerprint"],
+            "configuration_sha256": item["configuration_sha256"],
             "explanation": "Pinned upgrade is reviewed for next sprint",
             "expires": "2026-09-08",
         }
