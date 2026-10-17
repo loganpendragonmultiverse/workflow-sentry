@@ -13,9 +13,9 @@
 - Tie an exception to the configuration you reviewed so changed settings are checked again.
 
 
-## Current release 1.3.1
+## Current release 1.3.2
 
-This documentation patch corrects the scope section’s stale version reference. The analysis behavior is unchanged from 1.3.0.
+Recognize explicit self-hosted labels in both direct and group/labels runner selections. WS009 checks event-text references inside GitHub expression delimiters (`${{ ... }}`); plain literal mentions no longer trigger a critical interpolation finding. Runner groups without an explicit self-hosted label are not assumed to be self-hosted.
 
 Bind reviewed exceptions to the configuration they approved and reopen changed findings under new-only review.
 
@@ -50,7 +50,7 @@ Exit status is `1` when a finding meets `--fail-on`. The default threshold is `c
 - Expression checks are deliberately narrow and evidence-based, so novel injection patterns may require manual review.
 - No network request, GitHub token, repository mutation, telemetry, or workflow execution occurs.
 
-Supported on Python 3.10+ for Windows, macOS, and Linux. Version: **v1.3.1**.
+Supported on Python 3.10+ for Windows, macOS, and Linux. Version: **v1.3.2**.
 
 ## Development
 

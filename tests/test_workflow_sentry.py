@@ -92,3 +92,62 @@ def test_cli_markdown_clean_and_missing_files(
     assert "No findings" in capsys.readouterr().out
     with pytest.raises(SystemExit):
         main([str(tmp_path / "missing")])
+
+
+@pytest.mark.parametrize(
+    "runner",
+    [
+        {"group": "shared", "labels": ["self-hosted", "linux"]},
+        {"group": "shared", "labels": "self-hosted"},
+        {"labels": ["Self-Hosted", "linux"]},
+        ["Self-Hosted", "linux"],
+    ],
+)
+def test_self_hosted_mapping_and_case_insensitive_labels(runner: object) -> None:
+    findings = audit_document({"permissions": {}, "jobs": {"build": {"runs-on": runner}}})
+    assert [finding.code for finding in findings] == ["WS005"]
+
+
+@pytest.mark.parametrize("runner", [{"group": "shared"}, {"labels": "ubuntu-latest"}])
+def test_runner_mapping_does_not_guess_host_type(runner: object) -> None:
+    assert audit_document({"permissions": {}, "jobs": {"build": {"runs-on": runner}}}) == []
+
+
+@pytest.mark.parametrize(
+    "script,expected",
+    [
+        ('echo "github.event.issue.title"', False),
+        ('echo "${{ env.SAFE_TITLE }}" # github.event.issue.title', False),
+        ('echo "${{ github.event.issue.title }}"', True),
+        ('echo "${{\ngithub.event.issue.body\n}}"', True),
+    ],
+)
+def test_untrusted_shell_reference_requires_github_expression(script: str, expected: bool) -> None:
+    findings = audit_document({"permissions": {}, "jobs": {"build": {"steps": [{"run": script}]}}})
+    assert any(finding.code == "WS009" for finding in findings) is expected
+
+
+def test_mapping_runner_and_expression_cli_roundtrip(tmp_path: Path) -> None:
+    import json
+
+    workflow = tmp_path / "workflow.yml"
+    workflow.write_text(
+        "permissions: {}\njobs:\n  build:\n    runs-on:\n"
+        "      group: shared\n      labels: [self-hosted, linux]\n"
+        "    steps:\n      - run: echo github.event.issue.title\n",
+        encoding="utf-8",
+    )
+    output = tmp_path / "review.json"
+    assert main([str(workflow), "--format", "json", "--output", str(output)]) == 0
+    findings = json.loads(output.read_text())["reports"][0]["findings"]
+    assert [finding["code"] for finding in findings] == ["WS005"]
+    workflow.write_text(
+        workflow.read_text().replace(
+            "echo github.event.issue.title", "echo ${{ github.event.issue.title }}"
+        ),
+        encoding="utf-8",
+    )
+    sarif = tmp_path / "review.sarif"
+    assert main([str(workflow), "--format", "sarif", "--output", str(sarif)]) == 1
+    results = json.loads(sarif.read_text())["runs"][0]["results"]
+    assert {finding["ruleId"] for finding in results} == {"WS005", "WS009"}

@@ -15,3 +15,7 @@ Run the complete TESTING.md gates. Adversarial regressions cover trigger forms, 
 Bind reviewed exceptions to the configuration they approved and reopen changed findings under new-only review.
 
 Verify Emit value-free configuration digests and require a matching binding before suppressing a finding; Mark legacy unbound, expired and changed-configuration exceptions without applying them; Keep baseline identity stable while reporting updated configuration and rechecking it under new-only; Return actionable report-write errors without overwriting files. Run the full existing quality and build gates; release only through protected PR checks and verified tag artifacts.
+
+## 1.3.2 runner and interpolation regression acceptance
+
+Verify mapping-form runner labels produce WS005, plain event-path text does not produce WS009, and actual inline GitHub expressions still do. Exercise CLI JSON, SARIF and exit thresholds using disposable workflow files. Run the existing quality gates and installed tag-built wheel regressions.

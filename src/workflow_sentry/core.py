@@ -112,8 +112,9 @@ def audit_document(document: dict[str, Any]) -> list[Finding]:
         if "permissions" in job:
             findings.extend(_check_permissions(job.get("permissions"), f"{location}.permissions"))
         runs_on = job.get("runs-on")
-        runners = [runs_on] if isinstance(runs_on, str) else _sequence(runs_on)
-        if "self-hosted" in runners:
+        labels = _mapping(runs_on).get("labels") if isinstance(runs_on, dict) else runs_on
+        runners = [labels] if isinstance(labels, str) else _sequence(labels)
+        if any(isinstance(label, str) and label.casefold() == "self-hosted" for label in runners):
             findings.append(
                 Finding("high", "WS005", f"{location}.runs-on", "Job uses a self-hosted runner.")
             )
@@ -152,7 +153,11 @@ def audit_document(document: dict[str, Any]) -> list[Finding]:
                         )
                     )
             run = step.get("run")
-            if isinstance(run, str) and any(expr in run for expr in UNTRUSTED_EXPRESSIONS):
+            if isinstance(run, str) and any(
+                expr in match.group(1)
+                for match in re.finditer(r"\$\{\{(.*?)\}\}", run, re.DOTALL)
+                for expr in UNTRUSTED_EXPRESSIONS
+            ):
                 findings.append(
                     Finding(
                         "critical",
