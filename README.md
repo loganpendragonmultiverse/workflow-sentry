@@ -1,10 +1,17 @@
 # Workflow Sentry
 
-> ⭐ **Gold Star Project — finished for its intended scope.**
-> Scope reviewed for **v1.3.0** on **2026-10-17**. Actively maintained; meaningful future development can reopen the scope.
-> [What Gold Star means](https://www.loganpendragonforge.com/open-source/gold-star/)
+> ⭐ **Gold Star Project**
+> I consider this project complete. Fixes, maintenance and good new ideas are still welcome.
+> [About Gold Stars](https://www.loganpendragonforge.com/open-source/?gold=1)
 >
-> Static local workflow review, source evidence, baselines and configuration-bound reviewed exceptions.
+> Check local workflow files for risky settings and keep a record of findings you have reviewed.
+
+## What you can do
+
+- Read findings in a terminal report, Markdown or SARIF.
+- Compare findings with a saved baseline.
+- Tie an exception to the configuration you reviewed so changed settings are checked again.
+
 
 ## Current release 1.3.0
 
@@ -55,7 +62,7 @@ python -m build
 
 Security reports belong in `SECURITY.md` through the organization policy. Contributions are reviewed through pull requests. Licensed under MIT.
 
-## Version 1.1.0: reviewed improvements
+## Updates in 1.1.0
 
 Add SARIF source annotations and stable fingerprints, dated review exceptions, baseline comparisons and reusable/composite workflow coverage.
 
@@ -65,7 +72,7 @@ workflow-sentry .github/workflows --format sarif --output workflow-review.sarif
 
 --format sarif emits SARIF 2.1.0 locations with one-based YAML node line/column regions and logical locations. Missing properties point to their parent node and are labeled regionExact=false. Fingerprints combine relative source path, rule and logical location, remaining stable when unrelated lines move; changing indexed steps can change fingerprints. --baseline accepts a prior JSON report. --exceptions accepts a JSON array of fingerprint, explanation and expires (ISO date); --as-of controls expiry comparison, defaulting to the current UTC date. Expired exceptions never suppress failure thresholds. Reports retain suppressed findings and distinguish new, unchanged and resolved fingerprints. Composite steps and unpinned reusable workflow calls are covered by fixtures. No workflow is run, changed, or automatically trusted.
 
-## Version 1.2.0: reviewed improvements
+## Updates in 1.2.0
 
 Add five rules for privileged event chains, attacker-controlled checkout refs, unpinned container action digests, downloaded scripts piped into interpreters, and workflow-run artifact review. Add escaped standalone HTML reports with remediation guidance, a rule inventory, source-root-relative baselines, repeated exclusions, and opt-in failure thresholds for newly introduced findings.
 
