@@ -51,3 +51,10 @@ def test_expression_literal_and_index_cli_thresholds(tmp_path: Path) -> None:
     result = json.loads(report.read_text(encoding="utf-8"))["runs"][0]["results"]
     assert [finding["ruleId"] for finding in result] == ["WS009"]
     assert source.read_bytes() == expected_source
+
+
+@pytest.mark.parametrize("tail", ["", " }}", "' }} ${{ github.event.issue.title }}"])
+def test_long_escaped_quote_sequences_remain_bounded(tail: str) -> None:
+    script = "echo ${{ '" + "''" * 20000 + tail
+    findings = audit_document({"permissions": {}, "jobs": {"check": {"steps": [{"run": script}]}}})
+    assert any(item.code == "WS009" for item in findings) is tail.startswith("' }}")
