@@ -19,3 +19,11 @@ Add five rules for privileged event chains, attacker-controlled checkout refs, u
 Bind reviewed exceptions to the configuration they approved and reopen changed findings under new-only review.
 
 Copy both fingerprint and configuration_sha256 from a current JSON finding into each reviewed exception, together with explanation and expires. Any configuration-node change in that source file invalidates its bindings; comments, formatting and mapping-key order do not. The binding deliberately covers the full workflow configuration because permissions, events and neighboring steps affect trust. Legacy exceptions without a binding remain visible as unbound and do not suppress findings. Baselines now distinguish updated from unchanged, and --new-only evaluates new or updated findings. Hashes provide change evidence, not a signature or proof of safe workflow code. No actions are fetched or executed.
+
+## Gold Star scope review — 2026-10-17
+
+Reviewed release: v1.3.0. Static local workflow review, source evidence, baselines and configuration-bound reviewed exceptions.
+
+The identified useful scope gaps have been implemented and verified. This review found no remaining meaningful contribution inside the documented purpose; optionality alone is not a reason to exclude a useful in-scope feature. Bugs, compatibility and dependency maintenance remain active work, and a meaningful new idea can reopen the scope. Gold status is bound to the reviewed release in the Forge catalog. Reassess or remove that status when a new gap is identified.
+
+Definition: https://www.loganpendragonforge.com/open-source/gold-star/

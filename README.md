@@ -1,5 +1,11 @@
 # Workflow Sentry
 
+> ⭐ **Gold Star Project — finished for its intended scope.**
+> Scope reviewed for **v1.3.0** on **2026-10-17**. Actively maintained; meaningful future development can reopen the scope.
+> [What Gold Star means](https://www.loganpendragonforge.com/open-source/gold-star/)
+>
+> Static local workflow review, source evidence, baselines and configuration-bound reviewed exceptions.
+
 ## Current release 1.3.0
 
 Bind reviewed exceptions to the configuration they approved and reopen changed findings under new-only review.
