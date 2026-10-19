@@ -96,3 +96,7 @@ Use the same `--root` for both baseline creation and comparison. `--new-only` re
 ## 1.4.0 report controls
 
 Baseline comparisons now distinguish resolved findings from unverified findings in sources not scanned. Reports record scanned sources, excluded discovered sources and baseline sources omitted from this run. A missing or excluded file is not proof of resolution; use the same source root for comparable runs. Failure thresholds still apply only to findings actually scanned.
+
+## Changes prepared for 1.4.1
+
+Failed stdout writes, including a closed pipe, return exit status 2 with an error diagnostic. Normal report contents and existing file-preservation behavior are unchanged.

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import fnmatch
+import io
 import json
 import os as os  # noqa: PLC0414 - retained module attribute used by compatibility tests
 import sys
@@ -47,6 +48,24 @@ def _markdown(reports: list[dict[str, object]]) -> str:
     return "\n".join(lines)
 
 
+def _write_stdout(rendered: str) -> None:
+    """Deliver report bytes without leaving a failed buffered write for shutdown."""
+    try:
+        descriptor = sys.stdout.fileno()
+    except (AttributeError, io.UnsupportedOperation):
+        sys.stdout.write(rendered)
+        sys.stdout.flush()
+        return
+    pending = memoryview(
+        rendered.encode(sys.stdout.encoding or "utf-8", sys.stdout.errors or "strict")
+    )
+    while pending:
+        written = os.write(descriptor, pending)
+        if written <= 0:
+            raise OSError("stdout accepted no report bytes")
+        pending = pending[written:]
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Audit GitHub Actions workflows locally.")
     parser.add_argument("paths", nargs="*", type=Path)
@@ -75,7 +94,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--fail-on", choices=tuple(SEVERITY_ORDER), default="critical")
     args = parser.parse_args(argv)
     if args.list_rules:
-        print(json.dumps(GUIDANCE, indent=2))
+        try:
+            _write_stdout(json.dumps(GUIDANCE, indent=2) + "\n")
+        except (OSError, UnicodeError, ValueError) as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 2
         return 0
     if args.new_only and not args.baseline:
         print("error: --new-only requires --baseline", file=sys.stderr)
@@ -133,8 +156,8 @@ def main(argv: list[str] | None = None) -> int:
             with args.output.open("x", encoding="utf-8") as output:
                 output.write(rendered + "\n")
         else:
-            print(rendered)
-    except OSError as exc:
+            _write_stdout(rendered + "\n")
+    except (OSError, UnicodeError, ValueError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
     threshold = SEVERITY_ORDER[args.fail_on]

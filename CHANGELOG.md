@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.1 - 2026-10-19
+
+- Return exit status 2 for failed stdout writes, including closed pipes, without an extra interpreter shutdown warning.
+
 ## 1.4.0 - 2026-10-17
 
 - Track scanned, excluded and unscanned baseline sources. Findings omitted from the current scan are unverified rather than resolved.
