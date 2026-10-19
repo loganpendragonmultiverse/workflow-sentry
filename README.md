@@ -13,7 +13,11 @@
 - Tie an exception to the configuration you reviewed so changed settings are checked again.
 
 
-## Current release 1.4.0
+## Prepared release 1.4.1 — 2026-10-19
+
+Failed stdout writes, including a closed pipe, return exit status 2 with an error diagnostic. Normal report contents and existing file-preservation behavior are unchanged.
+
+## Updates in 1.4.0
 
 Track scanned, excluded and unscanned baseline sources. Findings omitted from the current scan are unverified rather than resolved.
 Quoted strings inside GitHub expressions no longer trigger WS009, while equivalent dot and literal-index event references are checked. This remains a static check: dynamically computed index keys still require manual review.
@@ -55,7 +59,7 @@ Exit status is `1` when a finding meets `--fail-on`. The default threshold is `c
 - Expression checks are deliberately narrow and evidence-based, so novel injection patterns may require manual review.
 - No network request, GitHub token, repository mutation, telemetry, or workflow execution occurs.
 
-Supported on Python 3.10+ for Windows, macOS, and Linux. Version: **v1.4.0**.
+Supported on Python 3.10+ for Windows, macOS, and Linux. Prepared version: **v1.4.1**.
 
 ## Development
 

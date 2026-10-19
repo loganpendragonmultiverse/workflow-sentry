@@ -32,3 +32,7 @@ Definition: https://www.loganpendragonforge.com/open-source/?gold=1
 ## 1.4.0 report controls
 
 Baseline comparisons now distinguish resolved findings from unverified findings in sources not scanned. Reports record scanned sources, excluded discovered sources and baseline sources omitted from this run. A missing or excluded file is not proof of resolution; use the same source root for comparable runs. Failure thresholds still apply only to findings actually scanned.
+
+## 1.4.1 stdout regression acceptance
+
+Exercise real closed stdout pipes with small and large reports, complete normal output, partial and zero descriptor writes, and in-memory streams. Verify status 2 without an ignored shutdown exception, unchanged source files, and existing report and output-file contracts.
